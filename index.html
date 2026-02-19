@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Your Code</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+  <div class="lang-toggle" onclick="toggleLang()" id="langToggle"><span id="langText">العربية</span></div>
+
+  <div class="brand">
+    <div class="logo">∑</div>
+    <h2 id="title">ET in Maths</h2>
+  </div>
+  
+  <p class="subtitle" id="subtitle">Enter phone numbers to retrieve your code</p>
+
+  <div class="form-container">
+    <input type="tel" id="phone" placeholder="Student Phone" maxlength="11">
+    <input type="tel" id="parentPhone" placeholder="Parent Phone" maxlength="11">
+
+    <button id="submitBtn" onclick="getCode()">
+      <span id="btnText">Get Code</span>
+      <div id="loader" class="spinner" style="display: none;"></div>
+    </button>
+  </div>
+
+  <div id="result" class="result"></div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
