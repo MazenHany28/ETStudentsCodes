@@ -1,5 +1,6 @@
 let isArabic = false;
 let currentCode = "";
+let currentWhatsappLink = "";
 const API_URL = "https://script.google.com/macros/s/AKfycbzsFThamKWUJWuDI9SMVdbwTwG758I-2hecrIETAe7NoTuP9zO5v51fUYWtAei1k4Oz/exec";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -8,14 +9,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   phoneInput.focus();
 
-  // Strict numeric typing filter
   [phoneInput, parentPhoneInput].forEach(input => {
     input.addEventListener("input", () => {
       input.value = input.value.replace(/[^\d\s]/g, "");
       input.classList.remove("input-error");
     });
 
-    // Submit on Enter key
     input.addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
         getCode();
@@ -41,6 +40,11 @@ function toggleLang() {
   const copyBtn = document.getElementById("copyBtn");
   if (copyBtn) {
     copyBtn.innerText = isArabic ? "نسخ الكود" : "Copy Code";
+  }
+
+  const whatsappBtnText = document.getElementById("whatsappBtnText");
+  if (whatsappBtnText) {
+    whatsappBtnText.innerText = isArabic ? "انضم لمجموعة الواتساب" : "Join WhatsApp Group";
   }
 }
 
@@ -119,12 +123,14 @@ function getCode() {
     .then(data => {
       if (data.success) {
         currentCode = data.code;
+        currentWhatsappLink = data.whatsappLink || "";
         showResult(
           isArabic 
             ? "🎉 أهلا " + data.studentname + "، الكود الخاص بك هو: " + data.code
             : "🎉 Hi " + data.studentname + ", your code is: " + data.code,
           true,
-          true
+          true,
+          currentWhatsappLink
         );
       } else {
         triggerShake();
@@ -148,10 +154,12 @@ function getCode() {
     });
 }
 
-function showResult(message, success, showCopy = false) {
+function showResult(message, success, showCopy = false, whatsappLink = "") {
   const resultDiv = document.getElementById("result");
   const resultMsg = document.getElementById("resultMsg");
   const copyBtn = document.getElementById("copyBtn");
+  const whatsappBtn = document.getElementById("whatsappBtn");
+  const whatsappBtnText = document.getElementById("whatsappBtnText");
 
   resultDiv.style.display = "flex";
   resultDiv.className = "result " + (success ? "success" : "error");
@@ -162,6 +170,15 @@ function showResult(message, success, showCopy = false) {
     copyBtn.innerText = isArabic ? "نسخ الكود" : "Copy Code";
   } else {
     copyBtn.style.display = "none";
+  }
+
+  // Display WhatsApp Button only if a valid link exists
+  if (whatsappLink && whatsappLink.length > 5) {
+    whatsappBtn.href = whatsappLink;
+    whatsappBtn.style.display = "inline-flex";
+    whatsappBtnText.innerText = isArabic ? "انضم لمجموعة الواتساب" : "Join WhatsApp Group";
+  } else {
+    whatsappBtn.style.display = "none";
   }
 }
 
