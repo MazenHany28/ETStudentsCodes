@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find Your Code</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/x-icon" href="images/icon.png">
+    <link rel="icon" href="images/icon.png">
 </head>
 <body>
 <div class="card">
@@ -18,15 +18,15 @@
   
   <p class="subtitle" id="subtitle">Enter phone numbers to retrieve your code</p>
 
-  <div class="form-container">
-    <input type="tel" id="phone" placeholder="Student Phone" maxlength="11">
-    <input type="tel" id="parentPhone" placeholder="Parent Phone" maxlength="11">
+<div class="form-container">
+  <input type="tel" id="phone" placeholder="Student Phone">
+  <input type="tel" id="parentPhone" placeholder="Parent Phone">
 
-    <button id="submitBtn" onclick="getCode()">
-      <span id="btnText">Get Code</span>
-      <div id="loader" class="spinner" style="display: none;"></div>
-    </button>
-  </div>
+  <button id="submitBtn" onclick="getCode()">
+    <span id="btnText">Get Code</span>
+    <div id="loader" class="spinner" style="display: none;"></div>
+  </button>
+</div>
 
   <div id="result" class="result"></div>
 </div>
