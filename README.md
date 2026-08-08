@@ -529,7 +529,7 @@ The application implements a multi-stage validation workflow before dispatching 
 
 ---
 
-## Deployment & Hosting
+## Deployment & Hosting 
 
 Because this application relies on static client assets, it can be hosted on platforms such as **GitHub Pages**, **Vercel**, or **Netlify**:
 

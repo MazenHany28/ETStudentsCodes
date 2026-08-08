@@ -1,17 +1,47 @@
 let isArabic = false;
+let currentCode = "";
+const API_URL = "https://script.google.com/macros/s/AKfycbzsFThamKWUJWuDI9SMVdbwTwG758I-2hecrIETAe7NoTuP9zO5v51fUYWtAei1k4Oz/exec";
+
+document.addEventListener("DOMContentLoaded", () => {
+  const phoneInput = document.getElementById("phone");
+  const parentPhoneInput = document.getElementById("parentPhone");
+
+  phoneInput.focus();
+
+  // Strict numeric typing filter
+  [phoneInput, parentPhoneInput].forEach(input => {
+    input.addEventListener("input", () => {
+      input.value = input.value.replace(/[^\d\s]/g, "");
+      input.classList.remove("input-error");
+    });
+
+    // Submit on Enter key
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        getCode();
+      }
+    });
+  });
+});
 
 function toggleLang() {
   isArabic = !isArabic;
   document.documentElement.lang = isArabic ? "ar" : "en";
   document.body.dir = isArabic ? "rtl" : "ltr";
 
-  // Update UI Text
   document.getElementById("langText").innerText = isArabic ? "English" : "العربية";
   document.getElementById("title").innerText = "ET in Maths";
-  document.getElementById("subtitle").innerText = isArabic ? "أدخل الأرقام للحصول على الكود" : "Enter phone numbers to retrieve your code";
+  document.getElementById("subtitle").innerText = isArabic 
+    ? "أدخل الأرقام للحصول على الكود" 
+    : "Enter phone numbers to retrieve your code";
   document.getElementById("btnText").innerText = isArabic ? "عرض الكود" : "Get Code";
   document.getElementById("phone").placeholder = isArabic ? "رقم هاتف الطالب" : "Student Phone";
   document.getElementById("parentPhone").placeholder = isArabic ? "رقم هاتف ولي الأمر" : "Parent Phone";
+  
+  const copyBtn = document.getElementById("copyBtn");
+  if (copyBtn) {
+    copyBtn.innerText = isArabic ? "نسخ الكود" : "Copy Code";
+  }
 }
 
 function validatePhoneNumber(number, isStudent) {
@@ -40,28 +70,38 @@ function validatePhoneNumber(number, isStudent) {
   return null;
 }
 
+function triggerShake() {
+  const card = document.getElementById("card");
+  card.classList.remove("shake");
+  void card.offsetWidth;
+  card.classList.add("shake");
+}
+
 function getCode() {
   const phoneInput = document.getElementById("phone");
   const parentPhoneInput = document.getElementById("parentPhone");
 
-  // Strip all whitespace (spaces, tabs, leading/trailing/middle spaces)
+  phoneInput.classList.remove("input-error");
+  parentPhoneInput.classList.remove("input-error");
+
   const phone = phoneInput.value.replace(/\s+/g, "");
   const parentPhone = parentPhoneInput.value.replace(/\s+/g, "");
 
-  // Update input fields in the UI with cleaned values
   phoneInput.value = phone;
   parentPhoneInput.value = parentPhone;
 
-  // Validate Student Phone
   const studentError = validatePhoneNumber(phone, true);
   if (studentError) {
+    phoneInput.classList.add("input-error");
+    triggerShake();
     showResult(studentError, false);
     return;
   }
 
-  // Validate Parent Phone
   const parentError = validatePhoneNumber(parentPhone, false);
   if (parentError) {
+    parentPhoneInput.classList.add("input-error");
+    triggerShake();
     showResult(parentError, false);
     return;
   }
@@ -74,17 +114,20 @@ function getCode() {
   btnText.innerText = isArabic ? "جاري التحميل..." : "Loading...";
   loader.style.display = "inline-block";
 
-  fetch(`https://script.google.com/macros/s/AKfycbzsFThamKWUJWuDI9SMVdbwTwG758I-2hecrIETAe7NoTuP9zO5v51fUYWtAei1k4Oz/exec?phone=${phone}&parentPhone=${parentPhone}`)
+  fetch(`${API_URL}?phone=${encodeURIComponent(phone)}&parentPhone=${encodeURIComponent(parentPhone)}`)
     .then(res => res.json())
     .then(data => {
       if (data.success) {
+        currentCode = data.code;
         showResult(
           isArabic 
             ? "🎉 أهلا " + data.studentname + "، الكود الخاص بك هو: " + data.code
             : "🎉 Hi " + data.studentname + ", your code is: " + data.code,
+          true,
           true
         );
       } else {
+        triggerShake();
         showResult(
           isArabic ? "البيانات غير صحيحة" : "Data not found",
           false
@@ -92,6 +135,7 @@ function getCode() {
       }
     })
     .catch(() => {
+      triggerShake();
       showResult(
         isArabic ? "حدث خطأ، حاول مرة أخرى" : "Something went wrong",
         false
@@ -104,9 +148,30 @@ function getCode() {
     });
 }
 
-function showResult(message, success) {
+function showResult(message, success, showCopy = false) {
   const resultDiv = document.getElementById("result");
-  resultDiv.style.display = "block";
+  const resultMsg = document.getElementById("resultMsg");
+  const copyBtn = document.getElementById("copyBtn");
+
+  resultDiv.style.display = "flex";
   resultDiv.className = "result " + (success ? "success" : "error");
-  resultDiv.innerText = message;
+  resultMsg.innerText = message;
+
+  if (showCopy) {
+    copyBtn.style.display = "inline-block";
+    copyBtn.innerText = isArabic ? "نسخ الكود" : "Copy Code";
+  } else {
+    copyBtn.style.display = "none";
+  }
+}
+
+function copyCode() {
+  if (!currentCode) return;
+  navigator.clipboard.writeText(currentCode).then(() => {
+    const copyBtn = document.getElementById("copyBtn");
+    copyBtn.innerText = isArabic ? "تم النسخ! ✓" : "Copied! ✓";
+    setTimeout(() => {
+      copyBtn.innerText = isArabic ? "نسخ الكود" : "Copy Code";
+    }, 2000);
+  });
 }
